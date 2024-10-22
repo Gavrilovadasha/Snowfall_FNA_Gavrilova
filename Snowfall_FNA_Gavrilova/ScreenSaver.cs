@@ -14,64 +14,94 @@ namespace Snowfall_FNA_Gavrilova
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Vector2 position;
-        Texture2D image;
-        public ScreenSaver() //This is the constructor, this function is called whenever the game class is created.
+
+        private Texture2D snowflakeTexture;
+        private Texture2D backgroundTexture;
+        private List<SnowflakeParameters> snowflakes;
+
+        private Random rnd = new Random();
+        private const int HeightWindows = 720;
+        private const int WidthWindows = 1280;
+
+        /// <summary>
+        /// Конструктор класса ScreenSaver.
+        /// </summary>
+        public ScreenSaver()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 1280;
-            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferHeight = HeightWindows;
+            graphics.PreferredBackBufferWidth = WidthWindows;
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
         }
 
         /// <summary>
-        /// This function is automatically called when the game launches to initialize any non-graphic variables.
-        /// </summary>
-        protected override void Initialize()
-        {
-            base.Initialize();
-            position = new Vector2(640, 360);
-        }
-
-        /// <summary>
-        /// Automatically called when your game launches to load any game assets (graphics, audio etc.)
+        /// Загружает содержимое папки "Content".
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            snowflakeTexture = TextureLoader.Load("snowflake", Content);
+            backgroundTexture = TextureLoader.Load("background", Content);
+            snowflakes = new List<SnowflakeParameters>();
 
-            image = TextureLoader.Load("snowflake", Content);
+            for (var i = 0; i < 250; i++)
+            {
+                var size = (float)rnd.Next(10, 35) / 100;
+                var speed = (float)rnd.NextDouble() * 50f + 20f;
+                var startPosition = new Vector2(rnd.Next(0, WidthWindows), rnd.Next(0, HeightWindows));
+
+                speed *= size * 10;
+
+                snowflakes.Add(new SnowflakeParameters(snowflakeTexture, startPosition, speed, size));
+            }
         }
 
         /// <summary>
-        /// Called each frame to update the game. Games usually runs 60 frames per second.
-        /// Each frame the Update function will run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
+        /// Обновляет состояние скринсейвера.
         /// </summary>
         protected override void Update(GameTime gameTime)
         {
-            //Update the things FNA handles for us underneath the hood:
+            base.Update(gameTime);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
+
+            foreach (var snowflake in snowflakes)
+            {
+                snowflake.SnowfallPosition(gameTime);
+
+                if (snowflake.PositionSnowflake.Y > HeightWindows)
+                {
+                    snowflake.ResetSnowfallPosition(new Vector2(rnd.Next(0, WidthWindows), -50));
+                }
+            }
+
             base.Update(gameTime);
         }
 
         /// <summary>
-        /// This is called when the game is ready to draw to the screen, it's also called each frame.
+        /// Отображает графическое содержимое.
         /// </summary>
         protected override void Draw(GameTime gameTime)
         {
-            //This will clear what's on the screen each frame, if we don't clear the screen will look like a mess:
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(image, position, Color.White);
+
+            spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height), Color.White);
+
+            foreach (var snowflake in snowflakes)
+            {
+                snowflake.SnowfallDraw(spriteBatch);
+            }
 
             spriteBatch.End();
 
-            //Draw the things FNA handles for us underneath the hood:
             base.Draw(gameTime);
         }
     }
