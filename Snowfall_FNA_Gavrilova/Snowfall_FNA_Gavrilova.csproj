@@ -47,15 +47,14 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="ScreenSaver.cs" />
-    <Compile Include="Utilites\Camera.cs" />
-    <Compile Include="Utilites\Global.cs" />
-    <Compile Include="Utilites\Input.cs" />
-    <Compile Include="Utilites\Resolution.cs" />
+    <Compile Include="SnowflakeParameters.cs" />
     <Compile Include="Utilites\TextureLoader.cs" />
-    <Compile Include="Utilites\XmlHelper.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Content\background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\snowflake.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
